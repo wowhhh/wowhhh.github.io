@@ -3,7 +3,7 @@ layout: post
 title:  "Install Tomcat!"
 tags:   Tomcat
 date:   2019-08-31 19:42:35 +0800
-categories: [Utils Servers DevelopmentTools]
+categories: [Servers]
 
 ---
 

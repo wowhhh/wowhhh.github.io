@@ -1,9 +1,9 @@
 ---
 layout: post
-title:  "初识元字符、量词及贪婪!"
+title:  "初识元字符、量词及贪婪"
 tags:   元字符 量词 贪婪
 date:   2020-07-23 16:42 +0800
-categories: [Regex 正则表达式]
+categories: [正则表达式]
 ---
 
 本篇主要内容为学习元字符、量词以及贪婪的基础知识。
