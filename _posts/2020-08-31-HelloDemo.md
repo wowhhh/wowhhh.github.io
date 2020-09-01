@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Hello Demo!"
-tags:   Page Demo
+tags:   PageDemo
 date:   2019-08-31 19:42:35 +0800
 categories: [GitHub Page]
 ---
