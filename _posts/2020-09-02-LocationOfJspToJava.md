@@ -10,15 +10,19 @@ categories: [Java Web]
 
 - 编译器的workpace
 
-  [参考文章](https://blog.csdn.net/qq_31908651/article/details/81938048)中提到的位置为`C:/Users/登录名/.IntelliJIdea2017.2/system/tomcat/Tomcat-pure_工程名/work/Catalina/localhost/appcontext名称/org/apache/jsp`
+  中提到的位置为
 
-  本人本机实际位置：`C:/Users/登录名/AppData/Local/JetBrains/IntelliJIdea2020.2/tomcat/Tomcat-pure_工程名/work/Catalina/localhost/appcontext名称/org/apache/jsp`
+  > C:/Users/登录名/.IntelliJIdea2017.2/system/tomcat/Tomcat-pure_工程名/work/Catalina/localhost/appcontext名称/org/apache/jsp
 
-  其中`JetBrains/IntelliJIdea2020.2`为不同之处。
+  本人本机实际位置：
+
+  > C:/Users/登录名/AppData/Local/JetBrains/IntelliJIdea2020.2/tomcat/Tomcat-pure_工程名/work/Catalina/localhost/appcontext名称/org/apache/jsp
+
+  其中```JetBrains/IntelliJIdea2020.2```为不同之处。
 
 - Tomcat安装目录
 
-  `Tomcat安装目录\work\Catalina\localhost\ROOT\org\apache\jsp`
+  ```Tomcat安装目录\work\Catalina\localhost\ROOT\org\apache\jsp```
 
 
 
