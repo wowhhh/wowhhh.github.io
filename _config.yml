@@ -85,6 +85,6 @@ valine:
   verify: false # Verification code
   visitor: true
   avatar: retro
-  placeholder: - 昵称 评论可显示此ID；\n - 邮箱 仅后台可见，用于后续交流;\n - 网址 可以是您的主页。\n上述内容皆为空，评论仍会显示……
+  placeholder: 支持Markdown(⊙o⊙)\n上述内容不填也显示评论内容(⊙o⊙)\n
   guest_info: nick,mail,link
   pageSize: 10

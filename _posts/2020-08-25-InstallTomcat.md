@@ -42,6 +42,12 @@ cd apache-tomcat-9.0.37/bin
 
 ![image-20200825195958345](https://i.loli.net/2020/09/01/toNyvbf56PBwKA7.png)
 
+### 安装（Windows）
+
+https://www.cnblogs.com/liuhongfeng/p/4177835.html
+
+可配置环境变量，命令行可以直接启动，不用进入bin目录
+
 ### Tomcat目录结构
 
 ![image-20200825203116644](https://i.loli.net/2020/09/01/nZhlHzuxsE6tDTJ.png)
