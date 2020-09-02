@@ -85,6 +85,6 @@ valine:
   verify: false # Verification code
   visitor: true
   avatar: retro
-  placeholder: say something~~\n - 昵称 为你所要显示的评论的ID；\n - 邮箱 仅后台可见，用于后续交流;\n - 网址 为你的评论的昵称的超链接。\n当然，以上都可以不写，评论依然会显示……
+  placeholder: - 昵称 评论可显示此ID；\n - 邮箱 仅后台可见，用于后续交流;\n - 网址 可以是您的主页。\n上述内容皆为空，评论仍会显示……
   guest_info: nick,mail,link
   pageSize: 10
