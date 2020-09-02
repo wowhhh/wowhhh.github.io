@@ -2,7 +2,7 @@
 layout: post
 title:  "Idea 常用快捷键"
 tags:   Shortcut Tips
-date:   2020-09-02
+date:   2020-09-02  10:00:00 +0800
 categories: [Idea]
 ---
 
