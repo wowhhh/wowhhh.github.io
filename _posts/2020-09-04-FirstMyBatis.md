@@ -180,7 +180,7 @@ public class User {
 }
 ```
 
-#### Mapper的编写与映射
+#### 05 : Mapper的编写与映射
 
 在编写Mapper之前，需要搞懂Mapper是什么，学到这里，肯定记得以前MVC结构的时候，定义dao，并且实现dao里面的接口，我们假如对上述User类创建了UserDao，并且实现了UserDao为UserDaoImpl。
 
@@ -268,7 +268,7 @@ public class User {
   </mappers>
   ```
 
-#### 05 : 测试
+#### 06 : 测试
 
 上述编写完成后就可以编写测试类进行测试了。
 
