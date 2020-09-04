@@ -7,9 +7,9 @@ categories: [MyBatis]
 
 ---
 
-如果你第一次打开Mybatis提供的中文文档，势必会一头雾水，MyBatis的文档的确很详细，但是没有照顾到小白。下面的内容是一步一步搭建出来一个MyBatis的示例。
+如果你第一次打开Mybatis提供的中文文档，势必会一头雾水（大佬除外），MyBatis的文档的确很详细，但是没有很好照顾到第一次接触MyBatis的用户。下面的内容是一步一步搭建出来一个MyBatis的示例。
 
-#### 数据库方面
+#### 00 : 数据库方面
 
 - 数据库创建
 
@@ -34,7 +34,7 @@ categories: [MyBatis]
 
 
 
-#### Maven相关依赖的导入
+#### 01 : Maven相关依赖的导入
 
 如官方文档所说：
 
@@ -78,13 +78,13 @@ categories: [MyBatis]
 </dependencies>
 ```
 
-#### MyBatis配置文件
+#### 02 : MyBatis配置文件
 
 [官方文档](https://mybatis.org/mybatis-3/zh/getting-started.html)提到这一点是这样描述的:
 
 > XML 配置文件中包含了对 MyBatis 系统的**核心设置**，包括获取数据库连接实例的数据源（**DataSource**）以及决定事务作用域和控制方式的事务管理器（**TransactionManager**）。
 >
-> .....
+> ...
 >
 > 当然，还有很多可以在 XML 文件中配置的选项，上面的示例仅罗列了最关键的部分。 注意 **XML 头部的声明**，它用来验证 XML 文档的正确性。**environment** 元素体中包含了事务管理和连接池的配置。**mappers** 元素则包含了一组映射器（mapper），这些映射器的 XML 映射文件包含了 SQL 代码和映射定义信息。
 
@@ -127,13 +127,13 @@ useUnicode=true;characterEncoding=UTF-8"/>
 </configuration>
 ```
 
-#### 工具类编写
+#### 03 : 工具类编写
 
 为什么编写工具类？在官方文档有这么提到
 
 > **每个**基于 MyBatis 的应用都是以一个 ***SqlSessionFactory*** 的实例为核心的。SqlSessionFactory 的实例可以通过 ***SqlSessionFactoryBuilder*** 获得。而 SqlSessionFactoryBuilder 则可以从 **XML 配置文件**或一个预先配置的 Configuration 实例来构建出 SqlSessionFactory 实例。
 >
-> ....
+> ...
 >
 > 既然有了 SqlSessionFactory，顾名思义，我们可以从中获得 **SqlSession** 的实例。
 
@@ -165,7 +165,7 @@ useUnicode=true;characterEncoding=UTF-8"/>
 
 ```getSqlSession```方法就是返回SqlSession对象。
 
-#### 实体类编写
+#### 04 : 实体类编写
 
 创建与数据库对应的User类，其中User的属性名称建议和数据库中的是一模一样的，这样也会方便后续的编写。
 
@@ -268,7 +268,7 @@ public class User {
   </mappers>
   ```
 
-#### 测试
+#### 05 : 测试
 
 上述编写完成后就可以编写测试类进行测试了。
 
