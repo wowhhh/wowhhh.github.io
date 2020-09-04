@@ -153,7 +153,7 @@ useUnicode=true;characterEncoding=UTF-8"/>
         }
     }
 
-    //从SqlSessionFactory获取SqlSession
+    //从SqlSessionFactory获取SqlSession，供后续调用
     public static SqlSession getSqlSession()
     {
 //        SqlSession session = sqlSessionFactory.openSession()
@@ -162,8 +162,6 @@ useUnicode=true;characterEncoding=UTF-8"/>
 ```
 
 上述代码可能有陌生的地方就是**获取SqlSessionFactory对象**，这是官方提供的书写方式，并且整个过程符合工厂设计模式的写法。
-
-```getSqlSession```方法就是返回SqlSession对象。
 
 #### 04 : 实体类编写
 
