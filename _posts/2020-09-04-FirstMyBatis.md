@@ -2,7 +2,7 @@
 layout: post
 title:  "作为小白，你需要自己动手尝试的第一个MyBatis实例"
 tags:   JDBC MySQLJunit
-date:   2020-09-04 00:00:00 +0800
+date:   2020-09-04 21:25:00 +0800
 categories: [MyBatis]
 
 ---
