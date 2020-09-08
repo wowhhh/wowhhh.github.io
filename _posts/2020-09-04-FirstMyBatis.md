@@ -103,7 +103,7 @@ categories: [MyBatis]
         "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <!--核心配置文件-->
 <configuration>
-<!--    environments可以配置多个环境，此处的是development，还可以配置test等-->
+<!--    environments可以配置多个环境，此处的是id为development-->
     <environments default="development">
         <environment id="development">
             <!--数据库配置-->
