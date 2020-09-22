@@ -38,7 +38,7 @@ categories: [Spider]
 
 2：初始化数据
 
-- **fkey**
+- **fkey**、ssrc、returnurl
 
   每次访问https://stackoverflow.com/users/login?ssrc=head&returnurl=https%3a%2f%2fstackoverflow.com%2f的时候，都会返回fkey用于后续登录传输数据验证。
 
@@ -55,23 +55,59 @@ categories: [Spider]
       return fkey
   ```
 
-- password
+- username & password
 
-- username
+  StackOverflow的用户名以及密码
 
-- ssrc
+- 参数封装
 
-- returnurl
+  ```python
+  data = {
+      'openid_identifier': '',
+      'password': password,
+      'fkey': fkey,
+      'email': username,
+      'oauth_server': '',
+      'oauth_version': '',
+      'openid_username': '',
+      'ssrc': 'head'
+  }
+  # ssrc=head&returnurl=https%3a%2f%2fstackoverflow.com%2f
+  params = {
+      'ssrc': 'head',
+      'returnurl': 'https://stackoverflow.com/'
+  }
+  ```
 
 3：提交登录
 
+```python
+# 提交登录
+res = self.session.post(self.login_url, data=data, params=params)
+```
+
 4：判断登录状态，获取Cookie
 
-spider
+```python
+if res.history:
+    res = self.session.get(self.home_url)
+    profile_url = 'https://stackoverflow.com' + re.findall(r'<a href="(.+)" class="my-profile', res.text)[0]
+    print('[INFO]: Account -> %s, login successfully...' % username)
+    infos_return = {'username': username, 'fkey': fkey, 'profile_url': profile_url}
+    return infos_return, self.session
+# 登录失败
+else:
+    raise RuntimeError('Account -> %s, fail to login, username or password error...' % username)
+```
 
-- 搜索结果页面
+## 爬取StackOverflow检索的概述
 
-  ![image-20200917103228253](https://raw.githubusercontent.com/ARP2019/ImageUpload/master/img/2020-09-15/image-20200917103228253.png)
+- 检索的内容
+
+![image-20200917103228253](https://raw.githubusercontent.com/ARP2019/ImageUpload/master/img/2020-09-15/image-20200917103228253.png)
+
+- 定义字段
+- Spider
 
 ![image-20200917103254198](https://raw.githubusercontent.com/ARP2019/ImageUpload/master/img/2020-09-15/image-20200917103254198.png)
 
