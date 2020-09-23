@@ -7,8 +7,6 @@ categories: [Spring]
 
 ---
 
-![image-20200916110612303](https://raw.githubusercontent.com/ARP2019/ImageUpload/master/img/2020-09-15/image-20200916110612303.png)
-
 ## Spring概念
 
 ### 初始Spring
