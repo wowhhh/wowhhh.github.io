@@ -108,7 +108,7 @@ else:
 
 ## 爬取StackOverflow检索的概述
 
-先用命令行创建一个Scrapy的项目：```scrapy start SoScrapySpider```
+先用命令行创建一个Scrapy的项目：```scrapy startproject SoScrapySpider```
 
 #### 需要获取的内容
 
@@ -355,3 +355,6 @@ def parse(self, response):
 
     print("Item Done")
 ```
+
+
+
