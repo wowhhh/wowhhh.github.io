@@ -12,7 +12,7 @@ categories: [FlowDroid]
 ## See This Demo
 
 - 仅仅提取出调用图
-```
+```java
 /**生成函数调用图*/
 public void generateCallGraph(String androidJarPath ,String apkPath )
 {
@@ -35,7 +35,7 @@ public void generateCallGraph(String androidJarPath ,String apkPath )
 
 ## 如何可视化？
 - Step1:
-```
+```java
 public static void main(String[] args)
    {
        SetupApplication app = new SetupApplication(jarPath, apk);
@@ -118,7 +118,6 @@ public static void main(String[] args)
 ```
 - Step2:
 ```java
-
 import it.uniroma1.dis.wsngroup.gexf4j.core.EdgeType;
 import it.uniroma1.dis.wsngroup.gexf4j.core.Gexf;
 import it.uniroma1.dis.wsngroup.gexf4j.core.Graph;
