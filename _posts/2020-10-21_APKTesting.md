@@ -49,3 +49,11 @@ API：https://www.cnblogs.com/dreamhighqiu/p/10989994.html
 重开：
 
 对比一下参考答案
+
+
+
+#### 众包测试
+
+1：如何看测试需求
+
+2：测试报告名称

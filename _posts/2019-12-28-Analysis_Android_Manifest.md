@@ -52,7 +52,23 @@ Flowdroid所有release的jar包以及其他资源在此处下载：[点我](http
 </metadata>
 ```
 
-3：pom.xml
+3：Jar包目录下的pom.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>ca.mcgill.sable</groupId>
+    <artifactId>soot-infoflow</artifactId>
+    <version>2.7.1</version>
+    <description>POM was created from install:install-file</description>
+</project>
+```
+
+
+
+4：Maven项目下的pom.xml
 
 ```xml
     <dependencies>
