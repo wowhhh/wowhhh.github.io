@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "JVM之内存区域"
+title:  "深入解析String#intern"
 tags:   JVM 面试 Java 转载
 date:   2020-12-12 10:00:11 +0800
 categories: [JVM]
