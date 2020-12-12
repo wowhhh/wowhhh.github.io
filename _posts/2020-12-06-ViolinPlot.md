@@ -59,3 +59,11 @@ sns.violinplot(data=logData,color='#9DC4BD')
 
 #### 设置图像宽度
 
+#### 设置坐标轴宽度
+
+#### 自定义坐标轴显示格式
+
+```python
+g.yaxis.set_major_formatter(mticker.FormatStrFormatter('$10^{{%.f}}$'))
+```
+
