@@ -159,6 +159,8 @@ CreareMap呢？
 
 通过上面这些内容，我们足以通过猜测得出结论：**最终的变量是放在了当前线程的 `ThreadLocalMap` 中，并不是存在 `ThreadLocal` 上，`ThreadLocal` 可以理解为只是`ThreadLocalMap`的封装，传递了变量值。** `ThrealLocal` 类中可以通过`Thread.currentThread()`获取到当前线程对象后，直接通过`getMap(Thread t)`可以访问到该线程的`ThreadLocalMap`对象。
 
+而且**每个线程持有一个ThreadLocalMap对象**。每一个新的线程Thread都会实例化一个ThreadLocalMap并赋值给成员变量threadLocals，使用时若已经存在threadLocals则直接使用已经存在的对象。
+
 那么问题来了，ThreadLocalMap是怎么样的结构呢？
 
 ```java
@@ -177,6 +179,8 @@ CreareMap呢？
 都是存储在ThreadLocalMap中，以对应的ThreadLocal为key，以存储的值为value
 
 ![ThreadLocal数据结构](https://snailclimb.gitee.io/javaguide/docs/java/multi-thread/images/threadlocal%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84.png)
+
+这里就可以明白，每个线程只有一个ThreadLocalMap，但是ThreadLocal是有多个的（多对多）。ThreadLocalMap的Key是ThreadLocal的弱引用。
 
 #### 大家都在提的内存泄露问题
 
