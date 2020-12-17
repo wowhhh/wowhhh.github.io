@@ -235,6 +235,8 @@ public void remove() {
 
 #### 参考文章
 
+未看：[万字详解ThreadLocal关键字](https://snailclimb.gitee.io/javaguide/#/docs/java/multi-thread/%E4%B8%87%E5%AD%97%E8%AF%A6%E8%A7%A3ThreadLocal%E5%85%B3%E9%94%AE%E5%AD%97)
+
 [用了三年 ThreadLocal 今天才弄明白其中的道理](https://mp.weixin.qq.com/s/vtLKqtHjAknbIV8RBojtbQ)
 
 [JavaGuild-ThreadLocal](https://snailclimb.gitee.io/javaguide/#/docs/java/multi-thread/2020%E6%9C%80%E6%96%B0Java%E5%B9%B6%E5%8F%91%E8%BF%9B%E9%98%B6%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%A2%98%E6%80%BB%E7%BB%93?id=_3-threadlocal)
