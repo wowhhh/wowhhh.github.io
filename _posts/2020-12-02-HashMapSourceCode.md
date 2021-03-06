@@ -9,9 +9,15 @@ categories: [Java]
 
 **基于 1.8**
 
+https://segmentfault.com/a/1190000012926722
+
 HashMap在JDK1.8之前是由数组加链表组成的，其中数组是主体，链表则是为了解决哈希冲突存在的。
 
 1.8之后HashMap的组成多了红黑树，当链表的长度超过8的时候，就会把链表转换成红黑树。加快了索引速度。
+
+底层的数据结构是数组，称之为哈希桶，每个桶里面放的是链表，链表中的每个节点就是哈希表中那个的每个元素。
+
+因为哈希桶的数据结构是**数组**，所以就会涉及到扩容的问题。
 
 #### 00 ：构造函数
 
@@ -98,7 +104,7 @@ public HashMap(Map<? extends K, ? extends V> m) {
        */
       static final int tableSizeFor(int cap) {
           int n = cap - 1;
-          n |= n >>> 1;//现将n无符号右移1位，并将结果与右移前的n做按位或操作，结果赋给n
+          n |= n >>> 1;//现将n无符号右移1位，并将结果与右移前的n做按位或操作（相同为0，不同为1），结果赋给n
           n |= n >>> 2;
           n |= n >>> 4;
           n |= n >>> 8;
@@ -120,7 +126,7 @@ public HashMap(Map<? extends K, ? extends V> m) {
   ```
 
   ```java
-  //存放元素的数组
+  //存放元素的数组，哈希桶
   transient Node<K,V>[] table;
   
   //实现Map.putAll以及构造函数的功能,m为传入的要转换成HashMap的map，evict设置为false表示是构造时候使用，反之不是    
@@ -171,38 +177,40 @@ public HashMap(Map<? extends K, ? extends V> m) {
 
 ```java
     static class Node<K,V> implements Map.Entry<K,V> {
-        final int hash;
-        final K key;
-        V value;
-        Node<K,V> next;
-
+        final int hash; //记录Hash值，如果向HashMap中插入值，会通过Key计算hash值，判断该放到哪里合适
+        final K key; //键
+        V value; //值
+        Node<K,V> next; //链表后置节点，指向下一个节点
+		//构造方法
         Node(int hash, K key, V value, Node<K,V> next) {
             this.hash = hash;
             this.key = key;
             this.value = value;
             this.next = next;
         }
-
+		//get()
         public final K getKey()        { return key; }
         public final V getValue()      { return value; }
+        //set
         public final String toString() { return key + "=" + value; }
-
+		//重写HashCode()方法，可以得到每一个节点的hash值
         public final int hashCode() {
+            //异或开运算，转换成二进制，相同为0，不同为1
             return Objects.hashCode(key) ^ Objects.hashCode(value);
         }
-
+		//设置新的value，返回旧的value
         public final V setValue(V newValue) {
             V oldValue = value;
             value = newValue;
             return oldValue;
         }
-
+		//重写equals方法，判断当前Node与传入的Node是否相等
         public final boolean equals(Object o) {
-            if (o == this)
+            if (o == this)//通过地址判断
                 return true;
-            if (o instanceof Map.Entry) {
-                Map.Entry<?,?> e = (Map.Entry<?,?>)o;
-                if (Objects.equals(key, e.getKey()) &&
+            if (o instanceof Map.Entry) {//如果o是map里面的元素
+                Map.Entry<?,?> e = (Map.Entry<?,?>)o;//转换Map指定类型成元素
+                if (Objects.equals(key, e.getKey()) &&//判断key和value是否都相等
                     Objects.equals(value, e.getValue()))
                     return true;
             }
@@ -211,21 +219,26 @@ public HashMap(Map<? extends K, ? extends V> m) {
     }
 ```
 
+Node类我们可以知道，这是一个单链表，每一个节点的Hash值，是将key的hashcode和value的hashcode异或得到的
+
 再看TreeNode是如何实现的，这两个节点都有重要作用：
 
 ```java
-    static final class TreeNode<K,V> extends LinkedHashMap.Entry<K,V> {
-        TreeNode<K,V> parent;  // red-black tree links
-        TreeNode<K,V> left;
-        TreeNode<K,V> right;
-        TreeNode<K,V> prev;    // needed to unlink next upon deletion
-        boolean red;
+    /**
+    红黑树结构
+    **/
+	static final class TreeNode<K,V> extends LinkedHashMap.Entry<K,V> {
+        TreeNode<K,V> parent;  // 父
+        TreeNode<K,V> left;//左
+        TreeNode<K,V> right;//右
+        TreeNode<K,V> prev;    // 前序节点
+        boolean red; //判断节点颜色，是否为红色
         TreeNode(int hash, K key, V val, Node<K,V> next) {
             super(hash, key, val, next);
         }
 
         /**
-         * Returns root of tree containing this node.
+         * 返回根节点，因为根节点的pre是null
          */
         final TreeNode<K,V> root() {
             for (TreeNode<K,V> r = this, p;;) {
@@ -237,23 +250,39 @@ public HashMap(Map<? extends K, ? extends V> m) {
         ....还有很多，就不看了，够用就行。。。
 ```
 
+#### resize
 
 
-#### 01 ：读取增删
+
+#### 01：Get
 
 这里我们主要关注的方法有：
 
 ```java
-    public V get(Object key) {...}
-	public V getOrDefault(Object key, V defaultValue) {...}
-	public V put(K key, V value) {...}
+    public V put(K key, V value) {...}
 	public void putAll(Map<? extends K, ? extends V> m) {...}
+	public V get(Object key) {...}
+	public V getOrDefault(Object key, V defaultValue) {...}
 	public V remove(Object key) {...}
 ```
+
+我们先看增加元素的方法：
 
 先看get相关的方法
 
 - get方法
+
+  get方法主要的查找步骤是先定位键值对所在的桶的位置，然后对链表或者红黑树进行查找.
+
+  那么是如何确定所在桶中的位置呢？实现的代码为：```first = tab[(n-1)&hash]```
+
+  因为根据传入的hash值，其在桶中的下标就为index = (n-1)&hash，(n-1)&hash的计算方式就相当于hash%(n-1)，对n-1的长度进行取余运算，因为位运算的效率高，所以就采取了位运算的方式。
+
+  还有一个hash()函数，目的是计算hash值，之前Node类里面已经重写了hashCode方法，但是这里并没有采用，而是重新计算了一次，因为有两个好处：
+
+  1：防止高位数据不发挥作用，通过hash()方法，可以使得原来哈希值的高位和地位进行异或运算(相同为0，不同为1)，加大了地位信息的随机性，让高位数据也参与其中
+
+  2：增加Hash的复杂度，原来的方式冲突率比较高
 
   ```java
       /**
@@ -263,16 +292,20 @@ public HashMap(Map<? extends K, ? extends V> m) {
           Node<K,V> e;
           return (e = getNode(hash(key), key)) == null ? null : e.value;
       }
+  	//根据Hash值和对应的Key值获取节点
       final Node<K,V> getNode(int hash, Object key) {
           Node<K,V>[] tab; Node<K,V> first, e; int n; K k;
+          //1: 定位键值对所在桶的位置
           if ((tab = table) != null && (n = tab.length) > 0 &&
               (first = tab[(n - 1) & hash]) != null) {
               if (first.hash == hash && // always check first node
                   ((k = first.key) == key || (key != null && key.equals(k))))
                   return first;
               if ((e = first.next) != null) {
+                  // 2. 如果 first 是 TreeNode 类型，则调用黑红树查找方法
                   if (first instanceof TreeNode)
                       return ((TreeNode<K,V>)first).getTreeNode(hash, key);
+                   // 2. 对链表进行查找
                   do {
                       if (e.hash == hash &&
                           ((k = e.key) == key || (key != null && key.equals(k))))
@@ -292,58 +325,196 @@ public HashMap(Map<? extends K, ? extends V> m) {
           Node<K,V> e;
           return (e = getNode(hash(key), key)) == null ? defaultValue : e.value;
       }
+  没啥将的，就是查找不到的话，按照指定的值返回
   ```
 
-- put
+#### 02:put
+
+寻找插入位置->桶是否为空->不为空就看是插入链表还是红黑树，需不需要扩容，需不需要链表转换成红黑树
+
+- put方法
 
   ```java
-      public V put(K key, V value) {
+      /**
+      根据指定的key存放value，如果map之前已经包括了 此key，则替换value
+      **/
+  	public V put(K key, V value) {
           return putVal(hash(key), key, value, false, true);
       }
-  	
-  	    final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
+  ```
+
+  再看putval
+
+  1. 当桶数组 table 为空时，通过扩容的方式初始化 table
+  2. 查找要插入的键值对是否已经存在，存在的话根据条件判断是否用新值替换旧值
+  3. 如果不存在，则将键值对链入链表中，并根据链表长度决定是否将链表转为红黑树
+  4. 判断键值对数量是否大于阈值，大于的话则进行扩容操作
+
+  ```java
+  final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
                      boolean evict) {
+          //tab存放 当前的哈希桶， p用作临时链表节点  
           Node<K,V>[] tab; Node<K,V> p; int n, i;
+          //如果当前哈希表是空的，代表是初始化
           if ((tab = table) == null || (n = tab.length) == 0)
+              //那么直接去扩容哈希表，并且将扩容后的哈希桶长度赋值给n
               n = (tab = resize()).length;
+          //如果当前index的节点是空的，表示没有发生哈希碰撞。 直接构建一个新节点Node，挂载在index处即可。
+          //index 是利用 哈希值 & 哈希桶的长度-1，替代模运算，相当于将Hash值对长度-1取余
           if ((p = tab[i = (n - 1) & hash]) == null)
               tab[i] = newNode(hash, key, value, null);
-          else {
+          else {//否则 发生了哈希冲突。
+              //e
               Node<K,V> e; K k;
+              //如果哈希值相等，key也相等，则是覆盖value操作
               if (p.hash == hash &&
                   ((k = p.key) == key || (key != null && key.equals(k))))
-                  e = p;
-              else if (p instanceof TreeNode)
+                  e = p;//将当前节点引用赋值给e
+              else if (p instanceof TreeNode)//红黑树暂且不谈
                   e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);
-              else {
+              else {//不是覆盖操作，则插入一个普通链表节点
+                  //遍历链表
                   for (int binCount = 0; ; ++binCount) {
-                      if ((e = p.next) == null) {
+                      if ((e = p.next) == null) {//遍历到尾部，追加新节点到尾部
                           p.next = newNode(hash, key, value, null);
+                          //如果追加节点后，链表数量》=8，则转化为红黑树
                           if (binCount >= TREEIFY_THRESHOLD - 1) // -1 for 1st
                               treeifyBin(tab, hash);
                           break;
                       }
+                      //如果找到了要覆盖的节点
                       if (e.hash == hash &&
                           ((k = e.key) == key || (key != null && key.equals(k))))
                           break;
                       p = e;
                   }
               }
+              //如果e不是null，说明有需要覆盖的节点，
               if (e != null) { // existing mapping for key
+                  //则覆盖节点值，并返回原oldValue
                   V oldValue = e.value;
                   if (!onlyIfAbsent || oldValue == null)
                       e.value = value;
+                  //这是一个空实现的函数，用作LinkedHashMap重写使用。
                   afterNodeAccess(e);
                   return oldValue;
               }
           }
+          //如果执行到了这里，说明插入了一个新的节点，所以会修改modCount，以及返回null。
+  
+          //修改modCount
           ++modCount;
+          //更新size，并判断是否需要扩容。
           if (++size > threshold)
               resize();
+          //这是一个空实现的函数，用作LinkedHashMap重写使用。
           afterNodeInsertion(evict);
           return null;
       }
   ```
+
+#### 03：扩容
+
+在 HashMap 中，桶数组的长度均是2的幂，阈值大小为桶数组长度与负载因子的乘积。当 HashMap 中的键值对数量超过阈值时，进行扩容。
+
+HashMap 的扩容机制与其他变长集合的套路不太一样
+
+HashMap 按当前桶数组长度的2倍进行扩容，阈值也变为原来的2倍（如果计算过程中，阈值溢出归零，则按阈值公式重新计算）。扩容之后，要重新计算键值对的位置，并把它们移动到合适的位置上去。
+
+- resize
+
+  ```java
+      final Node<K,V>[] resize() {
+          Node<K,V>[] oldTab = table;
+          int oldCap = (oldTab == null) ? 0 : oldTab.length;
+          int oldThr = threshold;
+          int newCap, newThr = 0;
+          //老桶的length>0，表示初始化过了
+          if (oldCap > 0) {
+              //如果已经是最大容量了，就将阈值也设置成最大值
+              if (oldCap >= MAXIMUM_CAPACITY) {
+                  threshold = Integer.MAX_VALUE;
+                  return oldTab;
+              }
+              //新的容量是老容量*2，如果还小于最大容量
+              //并且老容量大于默认容量 16，就将阈值也设置成原来的2倍
+              else if ((newCap = oldCap << 1) < MAXIMUM_CAPACITY &&
+                       oldCap >= DEFAULT_INITIAL_CAPACITY)
+                  newThr = oldThr << 1; // double threshold
+          }
+          //老桶没有初始化，但是阈值不是0，这是因为通过构造函数调用的，构造函数当时传入initialCapacity，并且根据initialCapacity计算出了离他最近的2的幂次，赋值给了threshold
+          else if (oldThr > 0) // initial capacity was placed in threshold
+              newCap = oldThr;
+          else { //调用无参构造的时候会进入这里，容量16，阈值为16*0.75
+              newCap = DEFAULT_INITIAL_CAPACITY;
+              newThr = (int)(DEFAULT_LOAD_FACTOR * DEFAULT_INITIAL_CAPACITY);
+          }
+          //新的阈值为0，这是因为扩容并且现在容量已经超过最大了，就需要对阈值进行重新计算，也就是上面第一个分支里面的第二个分支进来的
+          //也有可能是老的容量为0，但是之前的阈值>0，也就是上面第二个分支进来的
+          //第一个条件分支未计算 newThr 或嵌套分支在计算过程中导致 newThr 溢出归零
+          if (newThr == 0) {
+              float ft = (float)newCap * loadFactor;
+              newThr = (newCap < MAXIMUM_CAPACITY && ft < (float)MAXIMUM_CAPACITY ?
+                        (int)ft : Integer.MAX_VALUE);
+          }
+          threshold = newThr;
+          // 创建新的桶数组，桶数组的初始化也是在这里完成的
+          @SuppressWarnings({"rawtypes","unchecked"})
+              Node<K,V>[] newTab = (Node<K,V>[])new Node[newCap];
+          table = newTab;
+          if (oldTab != null) {
+              // 如果旧的桶数组不为空，则遍历桶数组，并将键值对映射到新的桶数组中
+              for (int j = 0; j < oldCap; ++j) {
+                  Node<K,V> e;
+                  if ((e = oldTab[j]) != null) {
+                      oldTab[j] = null;
+                      if (e.next == null)
+                          newTab[e.hash & (newCap - 1)] = e;
+                      else if (e instanceof TreeNode)
+                          // 重新映射时，需要对红黑树进行拆分
+                          ((TreeNode<K,V>)e).split(this, newTab, j, oldCap);
+                      else { // preserve order
+                          Node<K,V> loHead = null, loTail = null;
+                          Node<K,V> hiHead = null, hiTail = null;
+                          Node<K,V> next;
+                           // 遍历链表，并将链表节点按原顺序进行分组
+                          do {
+                              next = e.next;
+                              if ((e.hash & oldCap) == 0) {
+                                  if (loTail == null)
+                                      loHead = e;
+                                  else
+                                      loTail.next = e;
+                                  loTail = e;
+                              }
+                              else {
+                                  if (hiTail == null)
+                                      hiHead = e;
+                                  else
+                                      hiTail.next = e;
+                                  hiTail = e;
+                              }
+                          } while ((e = next) != null);
+                           // 遍历链表，并将链表节点按原顺序进行分组
+                          if (loTail != null) {
+                              loTail.next = null;
+                              newTab[j] = loHead;
+                          }
+                          if (hiTail != null) {
+                              hiTail.next = null;
+                              newTab[j + oldCap] = hiHead;
+                          }
+                      }
+                  }
+              }
+          }
+          return newTab;
+      }
+  ```
+
+#### 04：Remove
+
+第一步是定位桶位置，第二步遍历链表并找到键值相等的节点，第三步删除节点。
 
 - remove
 
@@ -358,12 +529,15 @@ public HashMap(Map<? extends K, ? extends V> m) {
                                  boolean matchValue, boolean movable) {
           Node<K,V>[] tab; Node<K,V> p; int n, index;
           if ((tab = table) != null && (n = tab.length) > 0 &&
+              // 1. 定位桶位置
               (p = tab[index = (n - 1) & hash]) != null) {
               Node<K,V> node = null, e; K k; V v;
+              // 如果键的值与链表第一个节点相等，则将 node 指向该节点
               if (p.hash == hash &&
                   ((k = p.key) == key || (key != null && key.equals(k))))
                   node = p;
               else if ((e = p.next) != null) {
+                  // 如果是 TreeNode 类型，调用红黑树的查找逻辑定位待删除节点
                   if (p instanceof TreeNode)
                       node = ((TreeNode<K,V>)p).getTreeNode(hash, key);
                   else {
@@ -378,6 +552,7 @@ public HashMap(Map<? extends K, ? extends V> m) {
                       } while ((e = e.next) != null);
                   }
               }
+               // 3. 删除节点，并修复链表或红黑树
               if (node != null && (!matchValue || (v = node.value) == value ||
                                    (value != null && value.equals(v)))) {
                   if (node instanceof TreeNode)
@@ -391,90 +566,11 @@ public HashMap(Map<? extends K, ? extends V> m) {
                   afterNodeRemoval(node);
                   return node;
               }
-          }
+        }
           return null;
       }
   ```
-
   
-
-#### 02 ：扩容
-
-```java
-final Node<K,V>[] resize() {
-    Node<K,V>[] oldTab = table;
-    int oldCap = (oldTab == null) ? 0 : oldTab.length;
-    int oldThr = threshold;
-    int newCap, newThr = 0;
-    if (oldCap > 0) {
-        if (oldCap >= MAXIMUM_CAPACITY) {
-            threshold = Integer.MAX_VALUE;
-            return oldTab;
-        }
-        else if ((newCap = oldCap << 1) < MAXIMUM_CAPACITY &&
-                 oldCap >= DEFAULT_INITIAL_CAPACITY)
-            newThr = oldThr << 1; // double threshold
-    }
-    else if (oldThr > 0) // initial capacity was placed in threshold
-        newCap = oldThr;
-    else {               // zero initial threshold signifies using defaults
-        newCap = DEFAULT_INITIAL_CAPACITY;
-        newThr = (int)(DEFAULT_LOAD_FACTOR * DEFAULT_INITIAL_CAPACITY);
-    }
-    if (newThr == 0) {
-        float ft = (float)newCap * loadFactor;
-        newThr = (newCap < MAXIMUM_CAPACITY && ft < (float)MAXIMUM_CAPACITY ?
-                  (int)ft : Integer.MAX_VALUE);
-    }
-    threshold = newThr;
-    @SuppressWarnings({"rawtypes","unchecked"})
-        Node<K,V>[] newTab = (Node<K,V>[])new Node[newCap];
-    table = newTab;
-    if (oldTab != null) {
-        for (int j = 0; j < oldCap; ++j) {
-            Node<K,V> e;
-            if ((e = oldTab[j]) != null) {
-                oldTab[j] = null;
-                if (e.next == null)
-                    newTab[e.hash & (newCap - 1)] = e;
-                else if (e instanceof TreeNode)
-                    ((TreeNode<K,V>)e).split(this, newTab, j, oldCap);
-                else { // preserve order
-                    Node<K,V> loHead = null, loTail = null;
-                    Node<K,V> hiHead = null, hiTail = null;
-                    Node<K,V> next;
-                    do {
-                        next = e.next;
-                        if ((e.hash & oldCap) == 0) {
-                            if (loTail == null)
-                                loHead = e;
-                            else
-                                loTail.next = e;
-                            loTail = e;
-                        }
-                        else {
-                            if (hiTail == null)
-                                hiHead = e;
-                            else
-                                hiTail.next = e;
-                            hiTail = e;
-                        }
-                    } while ((e = next) != null);
-                    if (loTail != null) {
-                        loTail.next = null;
-                        newTab[j] = loHead;
-                    }
-                    if (hiTail != null) {
-                        hiTail.next = null;
-                        newTab[j + oldCap] = hiHead;
-                    }
-                }
-            }
-        }
-    }
-    return newTab;
-}
-```
 
 
 
