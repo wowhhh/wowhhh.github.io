@@ -8,6 +8,8 @@ categories: [设计模式]
 
 好文：https://www.iteye.com/topic/652440
 
+![image-20210323095832607](https://raw.githubusercontent.com/ARP2019/ImageUpload/master/img/2021-03-16/image-20210323095832607.png)
+
 ## 简单介绍
 
 单例模式属于**创建型模式**，它是确保一个类最多只有一个实例，并提供一个全局访问点。也就是整个系统中只需要拥有这一个全局对象。
