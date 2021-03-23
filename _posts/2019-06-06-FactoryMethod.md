@@ -123,10 +123,17 @@ categories: [设计模式]
   }
   ```
 
-  
+
+
+
+## 源码
+
+![image-20210323101908035](https://raw.githubusercontent.com/ARP2019/ImageUpload/master/img/2021-03-16/image-20210323101908035.png)
 
 ## 参考文章
 
 https://blog.csdn.net/carson_ho/article/details/52343584
 
 https://design-patterns.readthedocs.io/zh_CN/latest/creational_patterns/factory_method.html#id25
+
+https://www.hollischuang.com/archives/1408
