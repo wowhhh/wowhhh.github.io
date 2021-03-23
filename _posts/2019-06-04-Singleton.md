@@ -4,8 +4,9 @@ title:  "单例模式 :)"
 tags:   创建型模式
 date:   2019-06-04 00:00:00 +0800
 categories: [设计模式]
-
 ---
+
+好文：https://www.iteye.com/topic/652440
 
 ## 简单介绍
 
