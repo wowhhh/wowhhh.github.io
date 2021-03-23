@@ -165,7 +165,16 @@ A对象为手机处理器供货商；B、C、D依赖此供货商进行批量生�
   }
   ```
 
-  
+
+#### 源码
+
+Observable：具体的观察者
+
+![image-20210323103830634](https://raw.githubusercontent.com/ARP2019/ImageUpload/master/img/2021-03-16/image-20210323103830634.png)
+
+Observer：被观察者
+
+![image-20210323103911009](https://raw.githubusercontent.com/ARP2019/ImageUpload/master/img/2021-03-16/image-20210323103911009.png)
 
 ## 参考文章
 
