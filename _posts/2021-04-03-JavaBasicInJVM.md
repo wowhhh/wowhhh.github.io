@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "当你把Java基础结合JVM的时候会发生什么？"
+title:  "Java Basic In JVM"
 tags:   Java 
 date:   2021-04-05 9:00:00 +0800
 categories: [JVM]
@@ -39,10 +39,6 @@ JVM为了提高和减少内存开销引入了字符串常量池的概念
   > *String* str = "abc" + "def";
   >
   >创建了几个对象
-
-#### 关键字、标识符与JVM
-
-
 
 #### 自增自减与JVM
 
@@ -84,7 +80,11 @@ iload_1：加载局部变量表的第1个变量到操作数栈顶
 
 注意-128 到127得缓存
 
+注意：float和double是没有缓存的，浮点类型，==没办法判相等
+
 https://blog.csdn.net/TofuCai/article/details/107697114
+
+[Byte、Short、Boolean、Char、Long的缓存](https://blog.csdn.net/cdecde111/article/details/60583372)
 
 #### 重载、重写与JVM
 
@@ -92,47 +92,57 @@ https://blog.csdn.net/TofuCai/article/details/107697114
 
 [分派](https://tobiaslee.top/2017/02/14/Override-and-Overload/)
 
-静态分派：重载，调用谁在编译的时候都确定了
+- 静态分派：重载，调用谁在编译的时候都确定了
 
-动态分派：重写
+  **虚拟机（准确说是编译器）是通过参数静态类型作为重载的判定依据**,两个变量实际类型不同，然并卵，静态类型相同，就决定了他们会使用同一个重载函数。
 
-#### 深拷贝、浅拷贝与JVM
+- 动态分派：重写
 
-#### 
+  invokevirtual指令的多态查找
 
 #### 反射与JVM
+
+https://blog.csdn.net/riemann_/article/details/104033656
 
 反射呢是 Java 语言中一个相当重要的特性，它允许正在运行的 Java 程序观测，甚至是修改程序的动态行为。表现为两点，一是对于任意一个类，都能知道这个类的所有属性和方法，二是对于任意一个对象，都能调用它的任意属性和方法。
 
 - 反射涉及的API
 
-  反射的使用还是比较简单的，涉及的 API 分为三类，Class、Member（Filed、Method、Constructor）、Array and Enumerated。我当时是直接扒 Oracle 官方文档看的，讲的很详细。
+  反射的使用还是比较简单的，涉及的 API 分为三类，Class、Member（Filed、Method、Constructor）、Array and Enumerated。
 
 - 反射为什么影响性能
-
-  我对反射的好奇是来源于，经常会听说反射影响性能，那么性能开销在哪以及如何优化？
 
   在此之前，我先讲讲 JVM 是如何实现反射的。
 
   我们可以直接 new Exception 来查看方法调用的栈轨迹，在调用 Method.invoke() 时，是去调用 DelegatingMethodAccessorImpl 的 invoke，它的实际调用的是 NativeMethodAccessorImpl 的 invoke 方法。前者称为委派实现，后者称为本地实现。既然委派实现的具体实现是一个本地实现，那么为啥还需要委派实现这个中间层呢？其实，Java 反射调用机制还设立了另一种动态生成字节码的实现，成为动态实现，直接使用 invoke 指令来调用目标方法。之所以采用委派实现，是在本地实现和动态实现直接做切换。依据注释信息，动态实现比本地实现相比，其运行效率要快上 20 倍。这是因为动态实现无需经过 Java 到 C++ 再到 Java 的切换，但由于生产字节码比较耗时，仅调用一次的话，反而是本地实现要快上三四倍。考虑到很多反射调用仅会执行一次，JVM 设置了阈值 15，在 15 之下使用本地实现，高于 15 时便开始动态生成字节码采用动态实现。这也被称为 Inflation 机制。
 
-  在反手说一下反射的性能开销在哪呢？平时我们会调用 Class.forName、Class.getMethod、以及 Method.invoke 这三个操作。其中，Class.forName 会调用本地方法
+  在反手说一下反射的性能开销在哪呢？平时我们会调用 Class.forName、Class.getMethod、以及 Method.invoke 这三个操作。
 
-  Class.getMethod 则会遍历该类的公有方法，如果没有匹配到，它还将遍历父类的公有方法，可想而知，这两个操作都非常耗时。
+  - Class.forName
 
-  下面就是 Method.invoke 调用本身的开销了，首先是 invoke 方法的参数是一个可变长参数，也就是构建一个 Object 数组存参数，这也同时带来了基本数据类型的装箱操作，在 invoke 内部会进行运行时权限检查，这也是一个损耗点。普通方法调用可能有一系列优化手段，比如方法内联、逃逸分析，而这又是反射调用所不能做的，性能差距再一次被放大。
+    在JDK的源码实现中，可以发现最终调用的是native方法forName0()，它在JVM中调用的实际是findClassFromClassLoader()，原理与ClassLoader的流程一样
 
+  - Class.getMethod 
+
+    会遍历该类的公有方法，如果没有匹配到，它还将遍历父类的公有方法，可想而知，这两个操作都非常耗时。
+  
+  - Method.invoke
+  
+    invoke 方法的参数是一个可变长参数，也就是构建一个 Object 数组存参数，这也同时带来了基本数据类型的装箱操作，在 invoke 内部会进行运行时权限检查，这也是一个损耗点。普通方法调用可能有一系列优化手段，比如方法内联、逃逸分析，而这又是反射调用所不能做的，性能差距再一次被放大。
+  
   优化反射调用，可以尽量避免反射调用虚方法、关闭运行时权限检查、可能需要增大基本数据类型对应的包装类缓存、如果调用次数可知可以关闭 Inflation 机制，以及增加内联缓存记录的类型数目。
 
 #### 多态与JVM
 
 https://segmentfault.com/a/1190000021936858
 
-
+分派
 
 #### 泛型与JVM
 
 语法糖，castcheck
+
+https://juejin.cn/post/6844904165391466504
 
 #### 注解与JVM
 
