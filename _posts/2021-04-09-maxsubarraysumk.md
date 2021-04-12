@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "华为实习一面的一道算法题"
+title:  "一面的一道算法题"
 tags:   面试 
 date:   2021-04-09 9:00:00 +0800
 categories: [面试]
